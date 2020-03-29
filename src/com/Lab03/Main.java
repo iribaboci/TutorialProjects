@@ -35,6 +35,7 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
     }
 
     Element head;
+    Element tail;
     // can be realization with the field size or without
     int size;
 
@@ -53,14 +54,16 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
 
         @Override
         public E next() {
+            E value = pos.object;
             pos = pos.next;
-            return pos.object;
+            return value;
         }
     }
 
     private class InnerListIterator implements ListIterator<E>{
-        Element p;
-        // TODO maybe more fields....
+        Element posElement = head;
+        int posIndex = 0;
+        boolean next = false;
 
         @Override
         public void add(E e) {
@@ -70,20 +73,24 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
 
         @Override
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            return false;
+            return posElement != null && posIndex<size;
         }
 
         @Override
         public boolean hasPrevious() {
-            // TODO Auto-generated method stub
-            return false;
+            return posElement != null && posElement.prev != null && posIndex > 0;
         }
 
         @Override
         public E next() {
-            // TODO Auto-generated method stub
-            return null;
+            if(posElement == null || posIndex >= size) {
+                throw new NoSuchElementException();
+            }
+            E positionValue = posElement.object;
+            posElement = posElement.next;
+            posIndex++;
+            next = true;
+            return positionValue;
         }
 
         @Override
@@ -93,8 +100,13 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
 
         @Override
         public E previous() {
-            // TODO Auto-generated method stub
-            return null;
+            if(posElement == null || posElement.prev == null) {
+                throw new NoSuchElementException();
+            }
+            posElement = posElement.prev;
+            posIndex--;
+            next = false;
+            return posElement.object;
         }
 
         @Override
@@ -110,7 +122,12 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
 
         @Override
         public void set(E e) {
-            // TODO Auto-generated method stub
+            Element newElem = new Element(e);
+            if(next && posElement.prev != null) {
+                posElement.prev = newElem;// getPrev().setValue(e);
+            } else if(!next && posElement != null) {
+                posElement = newElem;//  setValue(e);
+            }
 
         }
     }
@@ -210,46 +227,73 @@ class TwoWayLinkedListWithHead<E> implements IList<E>{
 }
 
 
-class Link{
+class Link {
     public String ref;
-    // in the future there will be more fields
+
     public Link(String ref) {
-        this.ref=ref;
+        this.ref = ref;
     }
+
+    public String getRef() {
+        return ref;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        //TODO
-        return true;
+        if (!(obj instanceof Link))
+            return false;
+        Link temp = (Link) obj;
+        return ref.equals(temp.ref);
     }
 
+    public boolean equals(Link link) {
+        return ref.equals(link.ref);
+    }
+    // in the future there will be more fields
 }
 
-class Document{
+class Document {
     public String name;
-    public TwoWayLinkedListWithHead<Link> link;
+    public TwoWayLinkedListWithHead<Link> links;
+
     public Document(String name, Scanner scan) {
-        this.name=name;
-        link=new TwoWayLinkedListWithHead<Link>();
+        this.name = name;
+        links = new TwoWayLinkedListWithHead<Link>();
+
         load(scan);
     }
+
     public void load(Scanner scan) {
-        //TODO
+        String input;
+        while (!(input = scan.nextLine()).equalsIgnoreCase("eod")) {
+            String[] arr = input.split("\\s+");
+            for (String word : arr) {
+                if (correctLink(word)) {
+                    Link temp = new Link(word.substring(5).toLowerCase());
+                    links.add(temp);
+                }
+            }
+        }
     }
+
     // accepted only small letters, capitalic letter, digits nad '_' (but not on the begin)
     private static boolean correctLink(String link) {
-        //TODO
-        return true;
+        return link.toLowerCase().matches("link=[A-Za-z][0-9A-Za-z_]*$");
     }
 
     @Override
     public String toString() {
-        // TODO
-        return null;
+        StringBuffer strBuffer = new StringBuffer();
+        Iterator<Link> it = links.iterator();
+        strBuffer.append("Document: " + name);
+        while (it.hasNext()) {
+            strBuffer.append("\n" + it.next().getRef());
+        }
+        return strBuffer.toString();
     }
-
     public String toStringReverse() {
         String retStr="Document: "+name;
-        return retStr+link.toStringReverse();
+        return retStr+links.toStringReverse();
     }
 
 }
@@ -304,7 +348,7 @@ public class Main {
             }
             // clear
             if(word[0].equalsIgnoreCase("clear") && word.length==1) {
-                doc[currentDocNo].link.clear();
+                doc[currentDocNo].links.clear();
                 continue;
             }
             // show
@@ -319,19 +363,19 @@ public class Main {
             }
             // size
             if(word[0].equalsIgnoreCase("size") && word.length==1) {
-                System.out.println(doc[currentDocNo].link.size());
+                System.out.println(doc[currentDocNo].links.size());
                 continue;
             }
             // add str
             if(word[0].equalsIgnoreCase("add") && word.length==2) {
-                System.out.println(doc[currentDocNo].link.add(new Link(word[1])));
+                System.out.println(doc[currentDocNo].links.add(new Link(word[1])));
                 continue;
             }
             // addi index str
             if(word[0].equalsIgnoreCase("addi") && word.length==3) {
                 int index=Integer.parseInt(word[1]);
                 try {
-                    doc[currentDocNo].link.add(index, new Link(word[2]));
+                    doc[currentDocNo].links.add(index, new Link(word[2]));
                 }
                 catch (NoSuchElementException e) {
                     System.out.println("error");
@@ -342,7 +386,7 @@ public class Main {
             if(word[0].equalsIgnoreCase("get") && word.length==2) {
                 int index=Integer.parseInt(word[1]);
                 try {
-                    Link l=doc[currentDocNo].link.get(index);
+                    Link l=doc[currentDocNo].links.get(index);
                     System.out.println(l.ref);
                 }
                 catch(NoSuchElementException e) {
@@ -354,7 +398,7 @@ public class Main {
             if(word[0].equalsIgnoreCase("set") && word.length==3) {
                 int index=Integer.parseInt(word[1]);
                 try {
-                    Link l=doc[currentDocNo].link.set(index,new Link(word[2]));
+                    Link l=doc[currentDocNo].links.set(index,new Link(word[2]));
                     System.out.println(l.ref);
                 }
                 catch(NoSuchElementException e) {
@@ -365,7 +409,7 @@ public class Main {
             }
             // index str
             if(word[0].equalsIgnoreCase("index") && word.length==2) {
-                int index=doc[currentDocNo].link.indexOf(new Link(word[1]));
+                int index=doc[currentDocNo].links.indexOf(new Link(word[1]));
                 System.out.println(index);
                 continue;
             }
@@ -373,7 +417,7 @@ public class Main {
             if(word[0].equalsIgnoreCase("remi") && word.length==2) {
                 int index=Integer.parseInt(word[1]);
                 try {
-                    Link l=doc[currentDocNo].link.remove(index);
+                    Link l=doc[currentDocNo].links.remove(index);
                     System.out.println(l.ref);
                 }
                 catch(NoSuchElementException e) {
@@ -383,13 +427,13 @@ public class Main {
             }
             // rem str
             if(word[0].equalsIgnoreCase("rem") && word.length==2) {
-                System.out.println(doc[currentDocNo].link.remove(new Link(word[1])));
+                System.out.println(doc[currentDocNo].links.remove(new Link(word[1])));
                 continue;
             }
             // addl <indexOfListArray>
             if(word[0].equalsIgnoreCase("addl") && word.length==2) {
                 int number=Integer.parseInt(word[1]);
-                doc[currentDocNo].link.add(doc[number].link);
+                doc[currentDocNo].links.add(doc[number].links);
                 continue;
             }
             System.out.println("Wrong command");
