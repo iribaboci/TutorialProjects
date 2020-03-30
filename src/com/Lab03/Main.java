@@ -205,13 +205,13 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     @Override
     public void clear() {
-        //TODO
+        head.next = null;
+        head.prev = null;
     }
 
     @Override
     public boolean contains(E element) {
-        //TODO
-        return false;
+        return indexOf(element)!=-1;
     }
 
     @Override
