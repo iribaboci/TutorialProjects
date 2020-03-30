@@ -120,7 +120,7 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
         @Override
         public boolean hasPrevious() {
-            return posElement != null && posElement.prev != null && posIndex > 0;
+            return posElement != null && posElement.getPrev() != null && posIndex > 0;
         }
 
         @Override
@@ -128,8 +128,8 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
             if (posElement == null || posIndex >= size) {
                 throw new NoSuchElementException();
             }
-            E positionValue = posElement.object;
-            posElement = posElement.next;
+            E positionValue = posElement.getValue();
+            posElement = posElement.getNext();
             posIndex++;
             next = true;
             return positionValue;
@@ -142,13 +142,13 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
         @Override
         public E previous() {
-            if (posElement == null || posElement.prev == null) {
+            if (posElement == null || posElement.getPrev() == null) {
                 throw new NoSuchElementException();
             }
-            posElement = posElement.prev;
+            posElement = posElement.getPrev();
             posIndex--;
             next = false;
-            return posElement.object;
+            return posElement.getValue();
         }
 
         @Override
@@ -175,7 +175,6 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
     }
 
     public TwoWayLinkedListWithHead() {
-        // make a head
         head = null;
         tail = null;
     }
@@ -184,7 +183,6 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
     public boolean add(E e) {
         Element newElem = new Element(e);
         if(head==null){
-            //newElem.prev = null;
             head=newElem;
         }
         else{
@@ -193,7 +191,8 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
         }
         tail = newElem;
         tail.next = head;
- /// not sure
+        head.prev = tail;
+
         size = size + 1;
         return true;
     }
@@ -271,7 +270,7 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     @Override
     public ListIterator<E> listIterator() {
-        throw new UnsupportedOperationException();
+        return new InnerListIterator();
     }
 
     @Override
@@ -314,11 +313,16 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
     }
 
     public String toStringReverse() {
-        ListIterator<E> iter = new InnerListIterator();
-        while (iter.hasNext())
-            iter.next();
+        ListIterator<E> iter = listIterator();
+        E e = null;
         String retStr = "";
-        //TODO use reverse direction of the iterator
+        while(iter.hasNext())
+            e = iter.next();
+        e = null;
+        while (iter.hasPrevious()){
+            e = iter.previous();
+            retStr+="\n" + ((Link) e).ref;
+        }
         return retStr;
     }
 
