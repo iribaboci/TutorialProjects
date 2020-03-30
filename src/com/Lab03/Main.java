@@ -216,9 +216,19 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     @Override
     public E get(int index) {
-        //TODO
-        return null;
+        return getElement(index).object;
     }
+    public Element getElement(int index) {
+        Element findNext = head;
+        while (index > 0 && findNext!=tail) {
+            findNext = findNext.next;
+            index--;
+        }
+        if (findNext==null)
+            throw new NoSuchElementException();
+        return findNext;
+    }
+
 
     @Override
     public E set(int index, E element) {
@@ -239,15 +249,19 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     @Override
     public int indexOf(E element) {
-        //TODO
+        int counter = 0;
+        Iterator<E> iterator = iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().equals(element))
+                return counter;
+            counter++;
+        }
         return -1;
     }
 
     @Override
     public boolean isEmpty() {
-        //TODO
-
-        return false;
+        return head == null;
     }
 
     @Override
@@ -262,20 +276,41 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     @Override
     public E remove(int index) {
-        //TODO
-        return null;
+        Element removeElement;
+        if (index < 0 || isEmpty())
+            throw new NoSuchElementException();
+        else if (index == 0) {
+            removeElement = head;
+            head = head.next;
+            tail.next = head;
+            head.prev = tail;
+        } else {
+            removeElement = getElement(index);
+            getElement(index - 1).next = removeElement.next;
+            removeElement.prev = getElement(index - 1).next;
+        }
+
+        return removeElement.object;
     }
 
     @Override
     public boolean remove(E e) {
-        //TODO
-        return true;
+        if (!isEmpty() && contains(e)) {
+            remove(indexOf(e));
+            return true;
+        } else
+            return false;
     }
 
     @Override
     public int size() {
-        //TODO
-        return -1;
+        int counter = 0;
+        Iterator<E> iterator = iterator();
+        while (iterator.hasNext()) {
+            iterator.next();
+            counter++;
+        }
+        return counter;
     }
 
     public String toStringReverse() {
