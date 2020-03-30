@@ -46,6 +46,28 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
         E object;
         Element next = null;
         Element prev = null;
+
+        private void setPrev(Element prev) {
+            this.prev = prev;
+
+        }
+        private Element getPrev() {
+            return prev;
+        }
+        private void setNext(Element element) {
+            this.next = next;
+
+        }
+        private Element getNext() {
+            return next;
+        }
+        public E getValue() {
+            return object;
+        }
+        public void setValue(E e) {
+            this.object = e;
+        }
+
     }
 
     Element head;
@@ -55,7 +77,8 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
 
     private class InnerIterator implements Iterator<E> {
         Element pos;
-        // TODO maybe more fields....
+        Element currElement = head;
+        int currIndex = 0;
 
         public InnerIterator() {
             pos = head;
@@ -64,13 +87,17 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
         @Override
         public boolean hasNext() {
 
-            return pos.next != head;
+            return currElement != null && currIndex < size;
         }
 
         @Override
         public E next() {
-            E value = pos.object;
-            pos = pos.next;
+            if(currElement == null || currIndex >= size) {
+                throw new NoSuchElementException();
+            }
+            E value = currElement.getValue();
+            currElement = currElement.getNext();
+            currIndex++;
             return value;
         }
     }
@@ -162,9 +189,8 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
         }
         else{
             tail.next = newElem;
+            newElem.prev = tail;
         }
-
-        newElem.prev = tail;
         tail = newElem;
         tail.next = head;
  /// not sure
