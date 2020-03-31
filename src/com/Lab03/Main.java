@@ -314,7 +314,14 @@ class TwoWayLinkedListWithHead<E> implements IList<E> {
     }
 
     public void add(TwoWayLinkedListWithHead<E> other) {
-        //TODO
+
+            if (other == null) throw new NullPointerException();
+            if (this.equals(other)) return;
+            tail.prev.next = other.head.next;
+            other.head.next.prev = tail.prev;
+            tail = other.tail;
+            other.clear();
+
     }
 }
 
